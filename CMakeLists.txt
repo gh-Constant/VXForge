@@ -18,7 +18,7 @@ endif()
 # Add engine as a library
 add_library(Engine
         Engine/src/Engine.cpp
-        Engine/src/VulkanRenderer.cpp
+        Engine/src/Window.cpp
 )
 
 target_include_directories(Engine PUBLIC Engine/include Game/include)
