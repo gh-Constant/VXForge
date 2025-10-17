@@ -1,0 +1,4 @@
+/Users/constantsuchet/CLionProjects/VXForge/cmake-build-debug/CMakeFiles/Engine.dir
+/Users/constantsuchet/CLionProjects/VXForge/cmake-build-debug/CMakeFiles/Game.dir
+/Users/constantsuchet/CLionProjects/VXForge/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/constantsuchet/CLionProjects/VXForge/cmake-build-debug/CMakeFiles/rebuild_cache.dir
