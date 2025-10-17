@@ -30,7 +30,7 @@ class VXForgeDevice {
   const bool enableValidationLayers = true;
 #endif
 
-  VXForgeDevice(MyEngineWindow &window);
+  VXForgeDevice(VXForgeWindow &window);
   ~VXForgeDevice();
 
   // Not copyable or movable
@@ -93,7 +93,7 @@ class VXForgeDevice {
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-  MyEngineWindow &window;
+  VXForgeWindow &window;
   VkCommandPool commandPool;
 
   VkDevice device_;
@@ -105,4 +105,4 @@ class VXForgeDevice {
   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 
-}  // namespace lve
+}  // namespace VXForge

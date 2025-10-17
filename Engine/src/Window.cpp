@@ -1,6 +1,7 @@
 ﻿// Created by const on 10/17/2025.
 //
 
+#include <stdexcept>
 #include <Window.h>
 
 #include <utility>
@@ -18,7 +19,6 @@ namespace VXForge {
         glfwTerminate();
     }
 
-
     void VXForgeWindow::initWindow() {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // NO_API = disable openGL
@@ -27,5 +27,9 @@ namespace VXForge {
         window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr); // monitor = fullscreen, share : openGl(null)
     }
 
-
+    void VXForgeWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
+        if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create window surface");
+        }
+    }
 }

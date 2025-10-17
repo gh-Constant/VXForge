@@ -12,6 +12,8 @@ namespace VXForge {
         VXForgeWindow(int width, int height, std::string name);
         ~VXForgeWindow();
 
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
         VXForgeWindow(const VXForgeWindow &) = delete;
         VXForgeWindow &operator=(const VXForgeWindow &) = delete;
 
