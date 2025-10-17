@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
-project(MyVulkanProject)
+
+project(VXForge)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,8 +19,6 @@ endif()
 add_library(Engine
         Engine/src/Engine.cpp
         Engine/src/VulkanRenderer.cpp
-        Game/src/main.cpp
-        Game/include/main.h
 )
 
 target_include_directories(Engine PUBLIC Engine/include Game/include)
@@ -28,7 +27,6 @@ target_link_libraries(Engine PUBLIC Vulkan::Vulkan glfw)
 
 # Add game executable
 add_executable(Game
-        Game/src/main.cpp
         Game/src/main.cpp
 )
 
