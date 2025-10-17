@@ -21,6 +21,7 @@ add_library(Engine
         Engine/src/Window.cpp
         Engine/include/GraphicsPipeline.h
         Engine/src/GraphicsPipeline.cpp
+        Engine/src/Device.cpp
 )
 
 target_include_directories(Engine SYSTEM PUBLIC Engine/include Game/include) #TODO: learn what is SYSTEM (constant)
