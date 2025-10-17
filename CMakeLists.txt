@@ -21,16 +21,18 @@ add_library(Engine
         Engine/src/Window.cpp
 )
 
-target_include_directories(Engine PUBLIC Engine/include Game/include)
+target_include_directories(Engine SYSTEM PUBLIC Engine/include Game/include) #TODO: learn what is SYSTEM (constant)
 target_link_libraries(Engine PUBLIC Vulkan::Vulkan glfw)
 
 
 # Add game executable
 add_executable(Game
-        Game/src/main.cpp
+        Game/src/GameWindow.cpp
+        Game/src/Game.cpp
+        Game/include/GameWindow.h
 )
 
-target_include_directories(Game PUBLIC Game/include)
+target_include_directories(Game SYSTEM PUBLIC Game/include Engine/include)
 
 # Link engine to game
 target_link_libraries(Game PRIVATE Engine)
