@@ -1,9 +1,9 @@
-#include <GameWindow.h>
+#include <Application.h>
 #include <Engine.h>
 #include <Window.h>
 
 namespace VXForgeDemo {
-    void GameWindow::start() const {
+    void Application::run() {
         while (!gameWindow.shouldClose()) {
             glfwPollEvents();
         }

@@ -19,6 +19,8 @@ endif()
 add_library(Engine
         Engine/src/Engine.cpp
         Engine/src/Window.cpp
+        Engine/include/GraphicsPipeline.h
+        Engine/src/GraphicsPipeline.cpp
 )
 
 target_include_directories(Engine SYSTEM PUBLIC Engine/include Game/include) #TODO: learn what is SYSTEM (constant)
@@ -27,9 +29,9 @@ target_link_libraries(Engine PUBLIC Vulkan::Vulkan glfw)
 
 # Add game executable
 add_executable(Game
-        Game/src/GameWindow.cpp
+        Game/src/Application.cpp
         Game/src/Game.cpp
-        Game/include/GameWindow.h
+        Game/include/Application.h
 )
 
 target_include_directories(Game SYSTEM PUBLIC Game/include Engine/include)

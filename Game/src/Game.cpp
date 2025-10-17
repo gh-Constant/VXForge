@@ -2,7 +2,7 @@
 // Created by const on 10/17/2025.
 //
 
-#include <GameWindow.h>
+#include <Application.h>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -10,8 +10,8 @@
 
 int main() {
     try {
-        VXForgeDemo::GameWindow gameWindow{};
-        gameWindow.start();
+        VXForgeDemo::Application Application{};
+        Application.run();
     } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
         return EXIT_FAILURE;
