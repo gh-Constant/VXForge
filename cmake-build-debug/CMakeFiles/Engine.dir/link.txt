@@ -1,2 +1,0 @@
-/usr/bin/ar qc libEngine.a CMakeFiles/Engine.dir/Engine/src/Engine.cpp.o CMakeFiles/Engine.dir/Engine/src/VulkanRenderer.cpp.o CMakeFiles/Engine.dir/Game/src/main.cpp.o
-/usr/bin/ranlib libEngine.a

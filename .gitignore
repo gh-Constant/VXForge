@@ -948,6 +948,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+# Ignore entire .idea directory for JetBrains IDEs
+.idea/
+
 ##### C++
 # Prerequisites
 *.d
