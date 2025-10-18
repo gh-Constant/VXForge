@@ -34,6 +34,8 @@ namespace VXForge {
         VXForgeGraphicsPipeline(const VXForgeGraphicsPipeline&) = delete;
         VXForgeGraphicsPipeline& operator=(const VXForgeGraphicsPipeline&) = delete;
 
+        void bind(VkCommandBuffer commandBuffer) const;
+
         static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
     private:

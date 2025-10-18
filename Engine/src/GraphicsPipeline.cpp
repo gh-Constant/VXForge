@@ -128,6 +128,10 @@ namespace VXForge {
         }
     }
 
+    void VXForgeGraphicsPipeline::bind(VkCommandBuffer commandBuffer) const {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    }
+
     PipelineConfigInfo VXForgeGraphicsPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
         PipelineConfigInfo configInfo{};
 
