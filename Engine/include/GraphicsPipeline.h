@@ -8,15 +8,33 @@
 #include <string>
 #include <vector>
 
+#include "Device.h"
+
 namespace VXForge {
+
+    struct PipelineConfigInfo {};
+
     class VXForgeGraphicsPipeline {
     public:
-        VXForgeGraphicsPipeline(const std::string& shaderName);
+        VXForgeGraphicsPipeline(VXForgeDevice& device, const std::string& shaderName, const PipelineConfigInfo& configInfo);
+        ~VXForgeGraphicsPipeline();
+
+        VXForgeGraphicsPipeline(const VXForgeGraphicsPipeline&) = delete;
+        VXForgeGraphicsPipeline& operator=(const VXForgeGraphicsPipeline&) = delete;
+
+        static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
     private:
         static std::vector<char> readFile(const std::string &filepath);
 
-        void createGraphicsPipeline(const std::string& shaderName);
+        void createGraphicsPipeline(const std::string& shaderName, const PipelineConfigInfo& config);
+
+        void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+
+        VXForgeDevice& vxforgeDevice;
+        VkPipeline graphicsPipeline;
+        VkShaderModule vertShaderModule;
+        VkShaderModule fragShaderModule;
     };
 }
 

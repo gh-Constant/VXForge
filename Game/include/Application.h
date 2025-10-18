@@ -23,7 +23,11 @@ namespace VXForgeDemo {
 
     private:
         VXForge::VXForgeWindow gameWindow{WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME};
-        VXForge::VXForgeGraphicsPipeline gameGraphicsPipeline{SHADER_NAME};
+        VXForge::VXForgeDevice gameDevice{gameWindow};
+        VXForge::VXForgeGraphicsPipeline gameGraphicsPipeline{
+            gameDevice,
+            SHADER_NAME,
+            VXForge::VXForgeGraphicsPipeline::defaultPipelineConfigInfo(WINDOW_WIDTH, WINDOW_HEIGHT)};
     };
 }
 

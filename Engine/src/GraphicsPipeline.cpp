@@ -9,8 +9,17 @@
 
 namespace VXForge {
 
-    VXForgeGraphicsPipeline::VXForgeGraphicsPipeline(const std::string& shaderName) {
-        createGraphicsPipeline(shaderName);
+    VXForgeGraphicsPipeline::VXForgeGraphicsPipeline(
+        VXForgeDevice& device,
+        const std::string& shaderName,
+        const PipelineConfigInfo& configInfo) : vxforgeDevice{device}, graphicsPipeline(VK_NULL_HANDLE), vertShaderModule(VK_NULL_HANDLE), fragShaderModule(VK_NULL_HANDLE) {
+        createGraphicsPipeline(shaderName, configInfo);
+    }
+
+    VXForgeGraphicsPipeline::~VXForgeGraphicsPipeline() {
+        vkDestroyPipeline(vxforgeDevice.device(), graphicsPipeline, nullptr);
+        vkDestroyShaderModule(vxforgeDevice.device(), fragShaderModule, nullptr);
+        vkDestroyShaderModule(vxforgeDevice.device(), vertShaderModule, nullptr);
     }
 
     std::vector<char> VXForgeGraphicsPipeline::readFile(const std::string& filepath) {
@@ -30,7 +39,7 @@ namespace VXForge {
         return buffer;
     }
 
-    void VXForgeGraphicsPipeline::createGraphicsPipeline(const std::string& shaderName) {
+    void VXForgeGraphicsPipeline::createGraphicsPipeline(const std::string& shaderName, const PipelineConfigInfo& configInfo) {
         const std::string vertFilepath = "../Engine/shaders/" + shaderName + ".vert.spv";
         const std::string fragFilepath = "../Engine/shaders/" + shaderName + ".frag.spv";
 
@@ -43,6 +52,25 @@ namespace VXForge {
         std::cout << "Vertex Shader Code Size " << vertCode.size() << '\n';
         std::cout << "Fragment Shader Code Size " << fragCode.size() << '\n';
     }
+
+    void VXForgeGraphicsPipeline::createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule) {
+        VkShaderModuleCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.codeSize = code.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+
+        if (vkCreateShaderModule(vxforgeDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create shader module!");
+        }
+    }
+
+    PipelineConfigInfo VXForgeGraphicsPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
+        PipelineConfigInfo configInfo{};
+
+        return configInfo;
+    }
+
+
 
 
 
