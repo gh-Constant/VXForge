@@ -35,7 +35,7 @@ class VXForgeDevice {
 
   // Not copyable or movable
   VXForgeDevice(const VXForgeDevice &) = delete;
-  void operator=(const VXForgeDevice &) = delete;
+  VXForgeDevice &operator=(const VXForgeDevice &) = delete;
   VXForgeDevice(VXForgeDevice &&) = delete;
   VXForgeDevice &operator=(VXForgeDevice &&) = delete;
 

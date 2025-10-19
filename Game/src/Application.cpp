@@ -1,6 +1,7 @@
 #include <Application.h>
 #include <array>
 #include <functional>
+#include <cassert>
 #include <Window.h>
 #include <stdexcept>
 
@@ -8,7 +9,7 @@ namespace VXForgeDemo {
     Application::Application() {
         loadModels();
         createPipelineLayout();
-        createPipeline();
+        recreateSwapChain();
         createCommandBuffers();
     }
 
@@ -44,11 +45,11 @@ namespace VXForgeDemo {
 
     void Application::createPipeline() {
         auto pipeline_config = VXForge::VXForgeGraphicsPipeline::defaultPipelineConfigInfo(
-            gameSwapChain.width(),
-            gameSwapChain.height()
+            gameSwapChain->width(),
+            gameSwapChain->height()
         );
 
-        pipeline_config.renderPass = gameSwapChain.getRenderPass();
+        pipeline_config.renderPass = gameSwapChain->getRenderPass();
         pipeline_config.pipelineLayout = pipelineLayout;
         gamePipeline = std::make_unique<VXForge::VXForgeGraphicsPipeline>(
             gameDevice,
@@ -57,8 +58,32 @@ namespace VXForgeDemo {
         );
     }
 
+    void Application::recreateSwapChain() {
+        auto extent = gameWindow.getExtent();
+        while (extent.width == 0 || extent.height == 0) {
+            extent = gameWindow.getExtent();
+            glfwWaitEvents();
+        }
+
+        vkDeviceWaitIdle(gameDevice.device());
+
+        if (gameSwapChain == nullptr) {
+            gameSwapChain = std::make_shared<VXForge::VXForgeSwapChain>(gameDevice, extent);
+        } else {
+            std::shared_ptr<VXForge::VXForgeSwapChain> oldSwapChain = std::move(gameSwapChain);
+            gameSwapChain = std::make_shared<VXForge::VXForgeSwapChain>(gameDevice, extent, oldSwapChain);
+
+            if (!oldSwapChain->compareSwapFormats(*gameSwapChain.get())) {
+                throw std::runtime_error("Swap chain image(or depth) format has changed!");
+            }
+        }
+
+        createPipeline();
+    }
+
+
     void Application::createCommandBuffers() {
-        commandBuffers.resize(gameSwapChain.imageCount());
+        commandBuffers.resize(gameSwapChain->imageCount());
 
         VkCommandBufferAllocateInfo alloc_info{};
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -73,50 +98,66 @@ namespace VXForgeDemo {
             ) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
             }
-
-        for (int i = 0; i < commandBuffers.size(); i++) {
-            VkCommandBufferBeginInfo begin_info{};
-            begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            if (vkBeginCommandBuffer(commandBuffers[i], &begin_info) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
-
-            VkRenderPassBeginInfo render_pass_info{};
-            render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            render_pass_info.renderPass = gameSwapChain.getRenderPass();
-            render_pass_info.framebuffer = gameSwapChain.getFrameBuffer(i);
-
-            render_pass_info.renderArea.offset = {0, 0};
-            render_pass_info.renderArea.extent = gameSwapChain.getSwapChainExtent();
-
-            std::array<VkClearValue, 2> clear_values{};
-            clear_values[0].color = {{0.01f, 0.01f, 0.01f, 1.0f}};
-            clear_values[1].depthStencil = {1.0f, 0};
-            render_pass_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
-            render_pass_info.pClearValues = clear_values.data();
-
-            vkCmdBeginRenderPass(commandBuffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-
-            gamePipeline->bind(commandBuffers[i]);
-            gameModel->bind(commandBuffers[i]);
-            gameModel->draw(commandBuffers[i]);
-
-            vkCmdEndRenderPass(commandBuffers[i]);
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer!");
-            }
-        };
     }
+
+    void Application::recordCommandBuffer(int imageIndex) {
+        VkCommandBufferBeginInfo begin_info{};
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandBuffers[imageIndex], &begin_info) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo render_pass_info{};
+        render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        render_pass_info.renderPass = gameSwapChain->getRenderPass();
+        render_pass_info.framebuffer = gameSwapChain->getFrameBuffer(imageIndex);
+
+        render_pass_info.renderArea.offset = {0, 0};
+        render_pass_info.renderArea.extent = gameSwapChain->getSwapChainExtent();
+
+        std::array<VkClearValue, 2> clear_values{};
+        clear_values[0].color = {{0.01f, 0.01f, 0.01f, 1.0f}};
+        clear_values[1].depthStencil = {1.0f, 0};
+        render_pass_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
+        render_pass_info.pClearValues = clear_values.data();
+
+        vkCmdBeginRenderPass(commandBuffers[imageIndex], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
+        gamePipeline->bind(commandBuffers[imageIndex]);
+        gameModel->bind(commandBuffers[imageIndex]);
+        gameModel->draw(commandBuffers[imageIndex]);
+
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+        if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
 
     void Application::drawFrame() {
         uint32_t image_index;
-        auto result = gameSwapChain.acquireNextImage(&image_index);
+        auto result = gameSwapChain->acquireNextImage(&image_index);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+            return;
+        }
+
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        result = gameSwapChain.submitCommandBuffers(&commandBuffers[image_index], &image_index);
+        recordCommandBuffer(image_index);
+
+        result = gameSwapChain->submitCommandBuffers(&commandBuffers[image_index], &image_index);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || gameWindow.wasWindowResized()) {
+            gameWindow.resetWindowResizedFlag();
+            recreateSwapChain();
+            return;
+        }
+
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }

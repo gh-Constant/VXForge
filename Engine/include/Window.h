@@ -12,19 +12,26 @@ namespace VXForge {
         VXForgeWindow(int width, int height, std::string name);
         ~VXForgeWindow();
 
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
-
         VXForgeWindow(const VXForgeWindow &) = delete;
         VXForgeWindow &operator=(const VXForgeWindow &) = delete;
 
         bool shouldClose() const { return glfwWindowShouldClose(window);}
         VkExtent2D getExtent() { return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)}; }
 
+        bool wasWindowResized() const { return framebufferResized; }
+        void resetWindowResizedFlag() { framebufferResized = false; }
+
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
     private:
+
+        static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+
         void initWindow();
 
-        const int width; // taille en abscisse
-        const int height; // taille en ordonné
+        int width; // taille en abscisse
+        int height; // taille en ordonné
+        bool framebufferResized = false;
 
         std::string windowName;
         GLFWwindow *window{};

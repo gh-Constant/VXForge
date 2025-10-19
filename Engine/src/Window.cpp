@@ -22,9 +22,18 @@ namespace VXForge {
     void VXForgeWindow::initWindow() {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // NO_API = disable openGL
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // Disable auto resizable windows
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // Disable auto resizable windows
 
         window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr); // monitor = fullscreen, share : openGl(null)
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    }
+
+    void VXForgeWindow::framebufferResizeCallback(GLFWwindow *window, int width, int height) {
+        auto vxforgeWindow = reinterpret_cast<VXForgeWindow *>(glfwGetWindowUserPointer(window));
+        vxforgeWindow->framebufferResized = true;
+        vxforgeWindow->width = width;
+        vxforgeWindow->height = height;
     }
 
     void VXForgeWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {

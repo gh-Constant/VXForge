@@ -38,10 +38,12 @@ namespace VXForgeDemo {
         void createPipeline();
         void createCommandBuffers();
         void drawFrame();
+        void recreateSwapChain();
+        void recordCommandBuffer(int imageIndex);
 
         VXForge::VXForgeWindow gameWindow{WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME};
         VXForge::VXForgeDevice gameDevice{gameWindow};
-        VXForge::VXForgeSwapChain gameSwapChain{gameDevice, gameWindow.getExtent()};
+        std::shared_ptr<VXForge::VXForgeSwapChain> gameSwapChain;
         std::unique_ptr<VXForge::VXForgeGraphicsPipeline> gamePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;

@@ -32,7 +32,7 @@ namespace VXForge {
         ~VXForgeGraphicsPipeline();
 
         VXForgeGraphicsPipeline(const VXForgeGraphicsPipeline&) = delete;
-        VXForgeGraphicsPipeline& operator=(const VXForgeGraphicsPipeline&) = delete;
+        VXForgeGraphicsPipeline &operator=(const VXForgeGraphicsPipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer) const;
 

@@ -4,6 +4,7 @@
 // vulkan headers
 #include <vulkan/vulkan.h>
 // std lib headers
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,10 +15,11 @@ class VXForgeSwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   VXForgeSwapChain(VXForgeDevice &deviceRef, VkExtent2D windowExtent);
+  VXForgeSwapChain(VXForgeDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<VXForgeSwapChain> previous);
   ~VXForgeSwapChain();
 
   VXForgeSwapChain(const VXForgeSwapChain &) = delete;
-  void operator=(const VXForgeSwapChain &) = delete;
+  VXForgeSwapChain &operator=(const VXForgeSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
@@ -36,7 +38,12 @@ class VXForgeSwapChain {
   VkResult acquireNextImage(uint32_t *imageIndex);
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
+  bool compareSwapFormats(const VXForgeSwapChain& swapChain) const {
+      return swapChain.swapChainDepthFormat == swapChainDepthFormat && swapChain.swapChainImageFormat == swapChainImageFormat;
+  }
+
  private:
+  void init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -52,6 +59,7 @@ class VXForgeSwapChain {
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
   VkFormat swapChainImageFormat;
+  VkFormat swapChainDepthFormat;
   VkExtent2D swapChainExtent;
 
   std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -67,6 +75,7 @@ class VXForgeSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  std::shared_ptr<VXForgeSwapChain> oldSwapChain;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;
