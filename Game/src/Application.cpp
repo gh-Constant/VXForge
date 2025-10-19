@@ -1,10 +1,12 @@
 #include <Application.h>
 #include <array>
+#include <functional>
 #include <Window.h>
 #include <stdexcept>
 
 namespace VXForgeDemo {
     Application::Application() {
+        loadModels();
         createPipelineLayout();
         createPipeline();
         createCommandBuffers();
@@ -24,6 +26,7 @@ namespace VXForgeDemo {
             glfwPollEvents();
             drawFrame();
         }
+        vkDeviceWaitIdle(gameDevice.device());
     }
 
     void Application::createPipelineLayout() {
@@ -96,7 +99,8 @@ namespace VXForgeDemo {
             vkCmdBeginRenderPass(commandBuffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 
             gamePipeline->bind(commandBuffers[i]);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            gameModel->bind(commandBuffers[i]);
+            gameModel->draw(commandBuffers[i]);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
@@ -117,4 +121,27 @@ namespace VXForgeDemo {
             throw std::runtime_error("failed to present swap chain image!");
         }
     }
+
+    void Application::loadModels() {
+        std::vector<VXForge::VXForgeModel::Vertex> vertices;
+        std::function<void(int, glm::vec2, glm::vec2, glm::vec2)> sierpinski =
+            [&](int depth, glm::vec2 top, glm::vec2 left, glm::vec2 right) {
+            if (depth <= 0) {
+                vertices.push_back({top, {1.0f, 0.0f, 0.0f}});
+                vertices.push_back({left, {0.0f, 1.0f, 0.0f}});
+                vertices.push_back({right, {0.0f, 0.0f, 1.0f}});
+                return;
+            }
+            auto left_mid = (top + left) / 2.0f;
+            auto right_mid = (top + right) / 2.0f;
+            auto bottom_mid = (left + right) / 2.0f;
+            sierpinski(depth - 1, top, left_mid, right_mid);
+            sierpinski(depth - 1, left_mid, left, bottom_mid);
+            sierpinski(depth - 1, right_mid, bottom_mid, right);
+        };
+
+        sierpinski(3, {0.0f, -0.5f}, {0.5f, 0.5f}, {-0.5f, 0.5f});
+        gameModel = std::make_unique<VXForge::VXForgeModel>(gameDevice, vertices);
+    }
+
 }

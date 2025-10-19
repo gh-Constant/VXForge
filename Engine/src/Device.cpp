@@ -314,11 +314,6 @@ bool VXForgeDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) {
       &extensionCount,
       availableExtensions.data());
 
-  std::cout << "Available DEVICE extensions on this GPU:" << std::endl;
-  for (const auto &ext : availableExtensions) {
-    std::cout << "\t" << ext.extensionName << std::endl;
-  }
-
   std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
   for (const auto &extension : availableExtensions) {

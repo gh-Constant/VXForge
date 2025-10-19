@@ -13,6 +13,8 @@
 #include <memory>
 #include <vector>
 
+#include "Model.h"
+
 namespace VXForgeDemo {
     class Application {
     public:
@@ -31,7 +33,7 @@ namespace VXForgeDemo {
         void run();
 
     private:
-
+        void loadModels();
         void createPipelineLayout();
         void createPipeline();
         void createCommandBuffers();
@@ -43,6 +45,7 @@ namespace VXForgeDemo {
         std::unique_ptr<VXForge::VXForgeGraphicsPipeline> gamePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;
+        std::unique_ptr<VXForge::VXForgeModel> gameModel;
     };
 }
 
