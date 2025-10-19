@@ -44,17 +44,18 @@ namespace VXForgeDemo {
     };
 
     void Application::createPipeline() {
-        auto pipeline_config = VXForge::VXForgeGraphicsPipeline::defaultPipelineConfigInfo(
-            gameSwapChain->width(),
-            gameSwapChain->height()
-        );
 
-        pipeline_config.renderPass = gameSwapChain->getRenderPass();
-        pipeline_config.pipelineLayout = pipelineLayout;
+        assert(gameSwapChain != nullptr && "Cannot create pipeline before swap chain");
+        assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+        VXForge::PipelineConfigInfo pipelineConfig{};
+        VXForge::VXForgeGraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
+        pipelineConfig.renderPass = gameSwapChain->getRenderPass();
+        pipelineConfig.pipelineLayout = pipelineLayout;
         gamePipeline = std::make_unique<VXForge::VXForgeGraphicsPipeline>(
             gameDevice,
             SHADER_NAME,
-            pipeline_config
+            pipelineConfig
         );
     }
 
@@ -73,12 +74,27 @@ namespace VXForgeDemo {
             std::shared_ptr<VXForge::VXForgeSwapChain> oldSwapChain = std::move(gameSwapChain);
             gameSwapChain = std::make_shared<VXForge::VXForgeSwapChain>(gameDevice, extent, oldSwapChain);
 
+            if (gameSwapChain->imageCount() != commandBuffers.size()) {
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+
             if (!oldSwapChain->compareSwapFormats(*gameSwapChain.get())) {
                 throw std::runtime_error("Swap chain image(or depth) format has changed!");
             }
         }
 
         createPipeline();
+    }
+
+    void Application::freeCommandBuffers() {
+        vkFreeCommandBuffers(
+            gameDevice.device(),
+            gameDevice.getCommandPool(),
+            static_cast<uint32_t>(commandBuffers.size()),
+            commandBuffers.data()
+        );
+        commandBuffers.clear();
     }
 
 
@@ -123,6 +139,17 @@ namespace VXForgeDemo {
         render_pass_info.pClearValues = clear_values.data();
 
         vkCmdBeginRenderPass(commandBuffers[imageIndex], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(gameSwapChain->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(gameSwapChain->getSwapChainExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        VkRect2D scissor{{ 0, 0 }, gameSwapChain->getSwapChainExtent()};
+        vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+        vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
         gamePipeline->bind(commandBuffers[imageIndex]);
         gameModel->bind(commandBuffers[imageIndex]);
